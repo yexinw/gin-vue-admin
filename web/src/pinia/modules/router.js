@@ -4,28 +4,24 @@ import { asyncMenu } from '@/api/menu'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-const routerListArr = []
 const notLayoutRouterArr = []
 const keepAliveRoutersArr = []
 const nameMap = {}
 
-const formatRouter = (routes, routeMap) => {
+const formatRouter = (routes, routeMap, parent) => {
   routes && routes.forEach(item => {
-    if ((!item.children || item.children.every(ch => ch.hidden)) && item.name !== '404' && !item.hidden) {
-      routerListArr.push({ label: item.meta.title, value: item.name })
-    }
+    item.parent = parent
     item.meta.btns = item.btns
     item.meta.hidden = item.hidden
     if (item.meta.defaultMenu === true) {
-      notLayoutRouterArr.push({
-        ...item,
-        path: `/${item.path}`,
-      })
-    } else {
-      routeMap[item.name] = item
-      if (item.children && item.children.length > 0) {
-        formatRouter(item.children, routeMap)
+      if (!parent) {
+        item = { ...item, path: `/${item.path}` }
+        notLayoutRouterArr.push(item)
       }
+    }
+    routeMap[item.name] = item
+    if (item.children && item.children.length > 0) {
+      formatRouter(item.children, routeMap, item)
     }
   })
 }
@@ -60,7 +56,6 @@ export const useRouterStore = defineStore('router', () => {
   emitter.on('setKeepAlive', setKeepAliveRouters)
 
   const asyncRouters = ref([])
-  const routerList = ref(routerListArr)
   const routeMap = ({})
   // 从后台获取动态路由
   const SetAsyncRouter = async() => {
@@ -94,13 +89,11 @@ export const useRouterStore = defineStore('router', () => {
     asyncRouterHandle(baseRouter)
     KeepAliveFilter(asyncRouter)
     asyncRouters.value = baseRouter
-    routerList.value = routerListArr
     return true
   }
 
   return {
     asyncRouters,
-    routerList,
     keepAliveRouters,
     asyncRouterFlag,
     SetAsyncRouter,
