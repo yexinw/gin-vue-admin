@@ -43,6 +43,7 @@
           icon="plus"
           @click="openDialog"
         >新增</el-button>
+        <el-icon  class="cursor-pointer" @click="toDoc('https://www.bilibili.com/video/BV1kv4y1g7nT?p=12&vd_source=f2640257c21e3b547a790461ed94875e')"><VideoCameraFilled /></el-icon>
       </div>
       <el-table
         ref="multipleTable"
@@ -218,6 +219,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { formatBoolean, formatDate } from '@/utils/format'
+import {toDoc} from "@/utils/doc";
+import {VideoCameraFilled} from "@element-plus/icons-vue";
 
 const router = useRouter()
 

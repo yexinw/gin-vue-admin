@@ -1,11 +1,11 @@
 <template>
   <el-container class="layout-cont">
     <el-container :class="[isSider?'openside':'hideside',isMobile ? 'mobile': '']">
-      <el-row :class="[isShadowBg?'shadowBg':'']" @click="changeShadow()" />
-      <el-aside class="main-cont main-left gva-aside">
-        <div class="tilte" :style="{background: backgroundColor}">
-          <img alt class="logoimg" :src="$GIN_VUE_ADMIN.appLogo">
-          <div v-if="isSider" class="tit-text" :style="{color:textColor}">{{ $GIN_VUE_ADMIN.appName }}</div>
+      <el-row :class="[isShadowBg?'bg-black opacity-30 w-full h-full absolute top-0 left-0 z-[1001]':'']" @click="changeShadow()" />
+      <el-aside class="main-cont gva-aside" :style="{width:asideWidth()}">
+        <div class="min-h-[60px] text-center transition-all duration-300 flex items-center justify-center gap-2" :style="{background: backgroundColor}">
+          <img alt class="w-9 h-9 p-1 bg-white rounded-full" :src="$GIN_VUE_ADMIN.appLogo">
+          <div v-if="isSider" class="inline-flex text-white font-bold text-2xl" :style="{color:textColor}">{{ $GIN_VUE_ADMIN.appName }}</div>
         </div>
         <Aside class="aside" />
       </el-aside>
@@ -13,20 +13,20 @@
       <el-main class="main-cont main-right">
         <transition :duration="{ enter: 800, leave: 100 }" mode="out-in" name="el-fade-in-linear">
           <div
-            :style="{width: `calc(100% - ${isMobile?'0px':isCollapse?'54px':'220px'})`}"
-            class="topfix"
+            :style="{width: `calc(100% - ${getAsideWidth()})`}"
+            class="fixed top-0 box-border z-50"
           >
             <el-row>
               <el-col>
                 <el-header class="header-cont">
-                  <el-row class="pd-0">
-                    <el-col :xs="2" :lg="1" :md="1" :sm="1" :xl="1" style="z-index:100">
-                      <div class="menu-total" @click="totalCollapse">
+                  <el-row class="p-0 h-full">
+                    <el-col :xs="2" :lg="1" :md="1" :sm="1" :xl="1" class="z-50 flex items-center pl-3">
+                      <div class="text-black cursor-pointer text-lg leading-5" @click="totalCollapse">
                         <div v-if="isCollapse" class="gvaIcon gvaIcon-arrow-double-right" />
                         <div v-else class="gvaIcon gvaIcon-arrow-double-left" />
                       </div>
                     </el-col>
-                    <el-col :xs="10" :lg="14" :md="14" :sm="9" :xl="14" :pull="1">
+                    <el-col :xs="10" :lg="14" :md="14" :sm="9" :xl="14" :pull="1" class="flex items-center">
                       <!-- 修改为手机端不显示顶部标签 -->
                       <el-breadcrumb v-show="!isMobile" class="breadcrumb">
                         <el-breadcrumb-item
@@ -35,12 +35,12 @@
                         >{{ fmtTitle(item.meta.title,route) }}</el-breadcrumb-item>
                       </el-breadcrumb>
                     </el-col>
-                    <el-col :xs="12" :lg="9" :md="9" :sm="14" :xl="9">
-                      <div class="right-box">
+                    <el-col :xs="12" :lg="9" :md="9" :sm="14" :xl="9" class="flex items-center justify-end">
+                      <div class="mr-1.5 flex items-center">
                         <Search />
                         <el-dropdown>
-                          <div class="dp-flex justify-content-center align-items height-full width-full">
-                            <span class="header-avatar" style="cursor: pointer">
+                          <div class="flex justify-center items-center h-full w-full">
+                            <span class="cursor-pointer flex justify-center items-center">
                               <CustomPic />
                               <span v-show="!isMobile" style="margin-left: 5px">{{ userStore.userInfo.nickName }}</span>
                               <el-icon>
@@ -49,9 +49,9 @@
                             </span>
                           </div>
                           <template #dropdown>
-                            <el-dropdown-menu class="dropdown-group">
+                            <el-dropdown-menu>
                               <el-dropdown-item>
-                                <span style="font-weight: 600;">
+                                <span class="font-bold">
                                   当前角色：{{ userStore.userInfo.authority.authorityName }}
                                 </span>
                               </el-dropdown-item>
@@ -92,11 +92,12 @@
         <router-view
           v-if="reloadFlag"
           v-slot="{ Component }"
-          v-loading="loadingFlag"
-          element-loading-text="正在加载中"
           class="admin-box"
         >
-          <div>
+          <div
+              v-loading="loadingFlag"
+              element-loading-text="正在加载中"
+          >
             <transition mode="out-in" name="el-fade-in-linear">
               <keep-alive :include="routerStore.keepAliveRouters">
                 <component :is="Component" />
@@ -211,6 +212,18 @@ onMounted(() => {
 
 const userStore = useUserStore()
 
+const asideWidth = ()=> {
+  if (isMobile.value) {
+    return isCollapse.value?'0px':'220px'
+  }
+  return isCollapse.value ? '54px' : '220px'
+}
+
+const getAsideWidth = () =>{
+  if(isMobile.value) return '0px'
+  return isCollapse.value?'54px':'220px'
+}
+
 const textColor = computed(() => {
   if (userStore.sideMode === 'dark') {
     return '#fff'
@@ -280,7 +293,6 @@ const changeShadow = () => {
 </script>
 
 <style lang="scss">
-@import '@/style/mobile.scss';
 .button {
   font-size: 12px;
   color: #666;
@@ -294,7 +306,5 @@ const changeShadow = () => {
 :deep .el-overlay {
   background-color: hsla(0,0%,100%,.9) !important;
 }
-.command-box{
 
-}
 </style>
